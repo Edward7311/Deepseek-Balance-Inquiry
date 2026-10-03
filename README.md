@@ -8,8 +8,6 @@
 out/dsbalance-1.0.apk     34 KB
 ```
 
-
-
 ## 它做什么 / 不做什么
 
 | 能做 | 不能做 |
@@ -41,66 +39,6 @@ MSYS_NO_PATHCONV=1 ./tools/platform-tools/adb.exe push out/dsbalance-1.0.apk /sd
 
 # 2. 然后在手机上：文件管理 → 下载 → 点这个文件 → 安装
 ```
-
-**为什么不能用 `adb install`**：小米澎湃系统在未开启「USB 调试(安全设置)」时会拒绝所有
-数据线安装，报 `INSTALL_FAILED_USER_RESTRICTED`。而那个开关要求登录小米账号 + 插 SIM 卡。
-推文件让手机上手动装，绕开了这层限制。
-
-> Git Bash 下必须加 `MSYS_NO_PATHCONV=1`，否则 adb 会把 `/sdcard/...` 误认成
-> Windows 路径 `/Program Files/Git/sdcard/...`。
-
-## 看手机屏幕
-
-```bash
-MSYS_NO_PATHCONV=1 ./tools/platform-tools/adb.exe exec-out screencap -p > shot.png
-```
-
-## 目录结构
-
-```
-app/
-  AndroidManifest.xml                        清单（包名 com.example.dsbalance）
-  src/com/example/dsbalance/
-      MainActivity.java                      界面 + 交互 + 边到边 + 状态栏配色
-      BalanceApi.java                        发 HTTPS 请求 + 解析 JSON，6 种错误归类
-      ApiKeyStore.java                       API key 的本机存储
-      BalanceCache.java                      最后一次成功的结果
-      ThemePrefs.java                        主题模式 + 包装 Context 实现深浅色
-  res/
-      values/{strings,colors,styles}.xml     浅色配色
-      values-night/{colors,styles}.xml       深色配色
-      layout/activity_main.xml
-      drawable/                              卡片背景、按钮、状态圆点、主题图标、鲸鱼
-      mipmap-anydpi-v26/ic_launcher.xml      自适应图标
-build.py                                     构建脚本（无 Gradle）
-extract_icon.py                              从官方 APK 提取鲸鱼矢量图（必要时自动拉取）
-tools/                                       aapt2 / d8 / zipalign / apksigner / adb
-out/                                         最终 APK
-```
-
-> `debug.keystore`（2.7 KB）**不要删**。它是签名密钥；重新生成会得到不同的签名，
-> 新版就盖不住手机上已装的版本，必须先卸载——你填的 key 和主题设置会一起丢。
-
-## 应用图标
-
-图标是从手机上安装的 DeepSeek 官方 App（`com.deepseek.chat`）里**原样提取**的，
-不是重画的：
-
-```bash
-python extract_icon.py      # 需要 tmp_icon/base.apk 存在
-```
-
-它做三件事：
-1. 从官方 `res/PF.xml` 取出 3050 字符的鲸鱼矢量路径（逐字节一致）
-2. 从官方 `res/9s.xml` 取出蓝色线性渐变 `#5d78fe → #3e5ffe`
-3. 用 `<aapt:attr>` 把渐变内联进路径，生成我们自己的前景图
-
-官方图标 = 纯白背景 + 蓝色渐变鲸鱼。编译后我的 APK 里会出现
-`res/drawable/$ic_launcher_foreground__0.xml`，**和官方 APK 的结构一致**。
-
-脚本不需要项目里存任何中间文件：`tmp_icon/base.apk` 不存在时会自动用 adb 从手机拉取
-官方 APK（约 21 MB），用完可以直接删，下次运行会重新拉。已用哈希比对确认
-"自动拉取"和"已有文件"两条路径生成的矢量图**逐字节相同**。
 
 ## 数据与安全
 
