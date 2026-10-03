@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DeepSeek 余额</string>
+
+    <!-- 主题 -->
+    <string name="theme_title">主题</string>
+    <string name="theme_system">跟随系统</string>
+    <string name="theme_light">始终浅色</string>
+    <string name="theme_dark">始终深色</string>
+
+    <!-- 余额卡片 -->
+    <string name="total_balance">总余额</string>
+    <string name="topped_up">充值余额</string>
+    <string name="granted">赠送余额</string>
+    <string name="status_ok">可用</string>
+    <string name="status_bad">不可用</string>
+    <string name="amount_format">¥ %1$s</string>
+    <string name="currency_cny">CNY</string>
+    <string name="updated_format">最后更新 %1$s</string>
+    <string name="placeholder">—</string>
+
+    <!-- 操作 -->
+    <string name="refresh">刷新</string>
+    <string name="refreshing">刷新中…</string>
+    <string name="change_key">更换 API Key</string>
+
+    <!-- 填入 Key -->
+    <string name="input_title">填入 API Key</string>
+    <string name="input_desc">Key 只保存在这台手机上，不会发送到任何其他地方。\n在 platform.deepseek.com 的 API keys 页面可以创建。</string>
+    <string name="input_hint">sk-…</string>
+    <string name="save">保存</string>
+    <string name="key_empty_toast">请先输入 API key</string>
+
+    <!-- 错误提示 -->
+    <string name="error_network">网络连接失败</string>
+    <string name="error_timeout">请求超时，请重试</string>
+    <string name="error_invalid_key">API key 无效，请重新填写</string>
+    <string name="error_server">DeepSeek 服务器错误（%1$d）</string>
+    <string name="error_parse">返回数据格式异常</string>
+    <string name="error_no_balance">未查询到余额信息</string>
+    <string name="error_showing_cache">%1$s，显示的是上次的数据</string>
+</resources>

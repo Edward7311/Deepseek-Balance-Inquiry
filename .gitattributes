@@ -1,0 +1,8 @@
+# 统一换行符为 LF。否则在 Windows 上（core.autocrlf=true）git 会在下次检出时
+# 把每个文件都改成 CRLF，导致全部 26 个文件都显示为"已修改"。
+* text=auto eol=lf
+
+# 这些是二进制，不要做换行符转换
+*.apk   binary
+*.idsig binary
+*.keystore binary

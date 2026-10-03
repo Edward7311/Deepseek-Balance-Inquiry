@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 浅色主题 -->
+    <color name="bg_page">#F4F5F7</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="bg_input">#FFFFFF</color>
+    <color name="text_primary">#14161A</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_hint">#AAB0B8</color>
+    <color name="divider">#E6E8EB</color>
+    <color name="accent">#4D6BFE</color>
+    <color name="accent_text">#FFFFFF</color>
+    <color name="status_ok">#2E9E5B</color>
+    <color name="status_bad">#D93B3B</color>
+    <color name="error_text">#D93B3B</color>
+    <color name="badge_bg">#E8ECFF</color>
+    <color name="badge_text">#3B55D9</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+</resources>
