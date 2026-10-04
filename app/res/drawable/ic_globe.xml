@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 地球：右上角的「网页」切换键，用来在应用界面和官网界面之间来回切 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- 外圈 -->
+    <path
+        android:pathData="M12,3 A9,9 0 1,1 11.99,3 Z"
+        android:fillColor="#00000000"
+        android:strokeColor="@color/text_secondary"
+        android:strokeWidth="1.6" />
+
+    <!-- 赤道 -->
+    <path
+        android:pathData="M3,12 L21,12"
+        android:strokeColor="@color/text_secondary"
+        android:strokeWidth="1.6" />
+
+    <!-- 经线 -->
+    <path
+        android:pathData="M12,3 C9,7 9,17 12,21 C15,17 15,7 12,3"
+        android:fillColor="#00000000"
+        android:strokeColor="@color/text_secondary"
+        android:strokeWidth="1.6" />
+</vector>

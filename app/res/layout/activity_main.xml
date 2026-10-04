@@ -1,283 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  根布局是 FrameLayout，因为它要叠两层：
+    ① 正常内容（标题 + 可滚动的主体）
+    ② 登录用的 WebView 覆盖层 —— 未登录时铺满，登录后缩成 1dp 留在后台
+
+  放在覆盖层而不是滚动区里，是为了避开 WebView 和 ScrollView 抢触摸事件的问题。
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_page"
-    android:orientation="vertical">
+    android:background="@color/bg_page">
 
-    <!-- 标题栏（自己画的，没有用系统 ActionBar） -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="16dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/app_name"
-            android:textColor="@color/text_primary"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <ImageButton
-            android:id="@+id/theme_button"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/theme_title"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_theme" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider" />
-
-    <!-- 状态一：填 API Key -->
-    <LinearLayout
-        android:id="@+id/input_panel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="20dp"
-        android:paddingTop="28dp"
-        android:paddingEnd="20dp"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/input_title"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:lineSpacingExtra="4dp"
-            android:text="@string/input_desc"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-
-        <EditText
-            android:id="@+id/input_key"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/input_bg"
-            android:hint="@string/input_hint"
-            android:importantForAutofill="no"
-            android:inputType="textVisiblePassword"
-            android:maxLines="1"
-            android:padding="14dp"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint"
-            android:textSize="15sp" />
-
-        <Button
-            android:id="@+id/save_key"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/btn_primary"
-            android:text="@string/save"
-            android:textColor="@color/accent_text"
-            android:textSize="16sp" />
-    </LinearLayout>
-
-    <!-- 状态二：余额 -->
-    <LinearLayout
-        android:id="@+id/data_panel"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:paddingStart="20dp"
-        android:paddingTop="20dp"
-        android:paddingEnd="20dp">
-
-        <!-- 主卡片 -->
+        <!-- 标题栏（固定在顶部，不跟着滚） -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/card_bg"
-            android:orientation="vertical"
-            android:padding="24dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="16dp">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/total_balance"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="bottom"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/total_amount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/placeholder"
-                    android:textColor="@color/text_primary"
-                    android:textSize="44sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/currency"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginBottom="7dp"
-                    android:text="@string/currency_cny"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="15sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <View
-                    android:id="@+id/status_dot"
-                    android:layout_width="9dp"
-                    android:layout_height="9dp"
-                    android:background="@drawable/dot_ok" />
-
-                <TextView
-                    android:id="@+id/status_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/placeholder"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 两个小卡片 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
-            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/card_bg"
-                android:orientation="vertical"
-                android:padding="18dp">
+                android:text="@string/app_name"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/topped_up"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
+            <ImageButton
+                android:id="@+id/browser_button"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/browser_toggle"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_globe" />
 
-                <TextView
-                    android:id="@+id/topped_up_amount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/placeholder"
-                    android:textColor="@color/text_primary"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:background="@drawable/card_bg"
-                android:orientation="vertical"
-                android:padding="18dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/granted"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
-
-                <TextView
-                    android:id="@+id/granted_amount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/placeholder"
-                    android:textColor="@color/text_primary"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+            <ImageButton
+                android:id="@+id/theme_button"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/theme_title"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_theme" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider" />
+
+        <!-- 主体：单页滚动 -->
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbarStyle="outsideOverlay">
 
-        <TextView
-            android:id="@+id/error"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:lineSpacingExtra="3dp"
-            android:textColor="@color/error_text"
-            android:textSize="13sp"
-            android:visibility="gone" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="24dp">
 
-        <Button
-            android:id="@+id/refresh"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:background="@drawable/btn_primary"
-            android:text="@string/refresh"
-            android:textColor="@color/accent_text"
-            android:textSize="16sp" />
+                <include layout="@layout/page_balance" />
 
-        <TextView
-            android:id="@+id/updated"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@color/bg_page_alt" />
 
-        <TextView
-            android:id="@+id/change_key"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:layout_marginBottom="16dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:gravity="center"
-            android:padding="10dp"
-            android:text="@string/change_key"
-            android:textColor="@color/accent"
-            android:textSize="13sp" />
+                <include layout="@layout/page_usage" />
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
 
-</LinearLayout>
+    <!--
+      WebView 覆盖层：登录时铺满，登录后缩成 1dp。
+      「完成」是逃生出口 —— 万一自动检测登录没生效，用户还能手动收起来，
+      不至于被登录页盖住、连按钮都点不到。
+    -->
+    <FrameLayout
+        android:id="@+id/webview_holder"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:background="@color/bg_page">
+
+        <TextView
+            android:id="@+id/usage_login_done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="20dp"
+            android:background="@drawable/btn_primary"
+            android:paddingStart="24dp"
+            android:paddingTop="13dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="13dp"
+            android:text="@string/usage_login_done"
+            android:textColor="@color/accent_text"
+            android:textSize="15sp" />
+    </FrameLayout>
+</FrameLayout>

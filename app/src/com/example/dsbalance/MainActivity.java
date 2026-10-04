@@ -7,46 +7,25 @@ import android.content.DialogInterface;
 import android.graphics.Insets;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+/**
+ * Hosts one scrolling page made of two independent blocks:
+ *
+ *   BalanceSection — official public API + API key. Always works.
+ *   UsageSection   — dashboard's private endpoints + an embedded browser session.
+ *                    May break without warning; when it does, only it breaks.
+ *
+ * What is left here is only what belongs to the whole screen: theme, edge-to-edge
+ * insets, status bar icon colour.
+ */
 public class MainActivity extends Activity {
 
     private ThemePrefs themePrefs;
-    private ApiKeyStore keyStore;
-
-    private final Handler handler = new Handler(Looper.getMainLooper());
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-
-    private LinearLayout inputPanel;
-    private LinearLayout dataPanel;
-    private EditText inputKey;
-    private Button refreshButton;
-    private TextView updatedView;
-    private TextView errorView;
-    private TextView statusText;
-    private TextView totalAmount;
-    private TextView toppedUpAmount;
-    private TextView grantedAmount;
-    private TextView currencyView;
-    private View statusDot;
-
-    /** True once real numbers are on screen, so a failure can avoid blanking them. */
-    private boolean hasData;
+    private BalanceSection balanceSection;
+    private UsageSection usageSection;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -59,21 +38,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        keyStore = new ApiKeyStore(this);
-
-        inputPanel = (LinearLayout) findViewById(R.id.input_panel);
-        dataPanel = (LinearLayout) findViewById(R.id.data_panel);
-        inputKey = (EditText) findViewById(R.id.input_key);
-        refreshButton = (Button) findViewById(R.id.refresh);
-        updatedView = (TextView) findViewById(R.id.updated);
-        errorView = (TextView) findViewById(R.id.error);
-        statusText = (TextView) findViewById(R.id.status_text);
-        totalAmount = (TextView) findViewById(R.id.total_amount);
-        toppedUpAmount = (TextView) findViewById(R.id.topped_up_amount);
-        grantedAmount = (TextView) findViewById(R.id.granted_amount);
-        currencyView = (TextView) findViewById(R.id.currency);
-        statusDot = findViewById(R.id.status_dot);
-
         applyEdgeToEdgeInsets();
         applyStatusBarIcons();
 
@@ -84,139 +48,23 @@ public class MainActivity extends Activity {
             }
         });
 
-        findViewById(R.id.change_key).setOnClickListener(new View.OnClickListener() {
+        balanceSection = new BalanceSection(this);
+        usageSection = new UsageSection(this);
+
+        // Opens the real DeepSeek site full-screen; tapping again puts it away.
+        findViewById(R.id.browser_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Prefilled so the stored key can be checked or edited in place.
-                inputKey.setText(keyStore.getKey());
-                showInputPanel();
+                usageSection.toggleBrowser();
             }
         });
-
-        findViewById(R.id.save_key).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String key = inputKey.getText().toString().trim();
-                if (key.isEmpty()) {
-                    Toast.makeText(MainActivity.this, R.string.key_empty_toast,
-                            Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                keyStore.setKey(key);
-                showDataPanel();
-                refresh();
-            }
-        });
-
-        refreshButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                refresh();
-            }
-        });
-
-        if (keyStore.getKey().isEmpty()) {
-            showInputPanel();
-        } else {
-            showDataPanel();
-            BalanceApi.Result cached = BalanceCache.load(this);
-            if (cached != null) {
-                render(cached);
-            }
-            refresh();
-        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        executor.shutdownNow();
-    }
-
-    // ---------------------------------------------------------------- fetching
-
-    private void refresh() {
-        final String key = keyStore.getKey();
-        if (key.isEmpty()) {
-            showInputPanel();
-            return;
-        }
-        setBusy(true);
-        errorView.setVisibility(View.GONE);
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                final BalanceApi.Result result = BalanceApi.fetch(key);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onFetched(result);
-                    }
-                });
-            }
-        });
-    }
-
-    private void onFetched(BalanceApi.Result result) {
-        // A theme change recreates the activity while a request may still be in flight.
-        if (isFinishing() || isDestroyed()) {
-            return;
-        }
-        setBusy(false);
-
-        if (result.isOk()) {
-            BalanceCache.save(this, result);
-            render(result);
-            errorView.setVisibility(View.GONE);
-            return;
-        }
-
-        String message = messageFor(result);
-        if (hasData) {
-            message = getString(R.string.error_showing_cache, message);
-        }
-        errorView.setText(message);
-        errorView.setVisibility(View.VISIBLE);
-    }
-
-    private String messageFor(BalanceApi.Result result) {
-        switch (result.code) {
-            case BalanceApi.ERR_UNAUTHORIZED:
-                return getString(R.string.error_invalid_key);
-            case BalanceApi.ERR_TIMEOUT:
-                return getString(R.string.error_timeout);
-            case BalanceApi.ERR_SERVER:
-                return getString(R.string.error_server, result.httpStatus);
-            case BalanceApi.ERR_PARSE:
-                return getString(R.string.error_parse);
-            case BalanceApi.ERR_NO_BALANCE:
-                return getString(R.string.error_no_balance);
-            default:
-                return getString(R.string.error_network);
-        }
-    }
-
-    private void render(BalanceApi.Result r) {
-        totalAmount.setText(getString(R.string.amount_format, r.total));
-        toppedUpAmount.setText(getString(R.string.amount_format, r.toppedUp));
-        grantedAmount.setText(getString(R.string.amount_format, r.granted));
-        if (r.currency != null && !r.currency.isEmpty()) {
-            currencyView.setText(r.currency);
-        }
-        statusDot.setBackgroundResource(r.available ? R.drawable.dot_ok : R.drawable.dot_bad);
-        statusText.setText(r.available ? R.string.status_ok : R.string.status_bad);
-        updatedView.setText(getString(R.string.updated_format, timeOf(r.fetchedAt)));
-        hasData = true;
-    }
-
-    private void setBusy(boolean busy) {
-        refreshButton.setEnabled(!busy);
-        refreshButton.setAlpha(busy ? 0.5f : 1.0f);
-        refreshButton.setText(busy ? R.string.refreshing : R.string.refresh);
-    }
-
-    private String timeOf(long millis) {
-        return new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date(millis));
+        balanceSection.shutdown();
+        usageSection.destroy();
     }
 
     // ------------------------------------------------------------------- chrome
@@ -289,15 +137,5 @@ public class MainActivity extends Activity {
                     }
                 })
                 .show();
-    }
-
-    private void showInputPanel() {
-        inputPanel.setVisibility(View.VISIBLE);
-        dataPanel.setVisibility(View.GONE);
-    }
-
-    private void showDataPanel() {
-        inputPanel.setVisibility(View.GONE);
-        dataPanel.setVisibility(View.VISIBLE);
     }
 }

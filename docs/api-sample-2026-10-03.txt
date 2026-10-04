@@ -1,0 +1,44 @@
+================================================================================
+DeepSeek 网页仪表盘 —— 私有接口的原始返回
+================================================================================
+
+抓取时间   2026-10-03 22:50 前后
+抓取方式   应用内「诊断」区的「抓取原始数据」按钮
+抓取位置   https://platform.deepseek.com/usage 页面内部，
+           用页面自己的登录会话（localStorage 里的 userToken）发起请求
+
+【为什么留这份文件】
+
+代码里的注释（UsageModel.java）只概括了接口结构，这里是完整的字段名、嵌套
+层级和真实数值。哪天接口变了、图表显示不出来了，对着这份数据比对，能立刻
+看出哪里变了 —— 不用重新跑一遍探针（那要在手机上操作、等结果）。
+
+另外，文档里那些"某个字段一直是什么值"的判断，也是从这份数据里看出来的，
+比如 PROMPT_TOKEN 恒为 0、REQUEST 在金额接口里恒为 0。
+
+【六个接口分别是什么】
+
+  by_api_key/amount   每日 tokens，按 (API key × 模型) 交叉 —— 柱状图数据源
+  by_api_key/cost     每日金额，同样交叉 —— 柱状图的另一个数据源
+  usage/amount        本月 tokens，按模型汇总
+  usage/cost          本月金额，按模型汇总
+  users/get_user_summary   账户余额拆分 + 累计消费
+  users/get_api_keys  API key 列表
+
+⚠️ 注意：这是真实账户的数据快照，含 token 用量和余额。
+   仓库虽然是私有的，但也不要公开。
+
+================================================================================
+
+正在检查…（约 12 秒）
+
+页面地址: https://platform.deepseek.com/usage
+localStorage 共 22 个键: __appKit_@deepseek/platform_fg_payment, __appKit_@deepseek/platform_lastSessionValue, __appKit_@deepseek/platform_themePreference, .thumbcache_6b2e5483f9d858d7c661c5e276b6a6ae, userUsageCurrencyCountInLastSession, __appKit_@deepseek/platform_banner, deepseek-device-id:platform, deepseek.platform.usage.boardPreference.v1.496e1ddb-7bcc-4c77-962c-4e35bc03878d, __appKit_@deepseek/platform_debugPanelEnabled, userCurrencyInLastSession, __tea_cache_tokens_20006841, homeNotice1Closed, __ds_remote_feature_did, __ds_remote_feature_store, __appKit_@deepseek/platform_bannerSettings, __tea_cache_first_20006841, __appKit_@deepseek/platform_debug, smidV2, homeNotice2Closed, __appKit_userInfo, __appKit_@deepseek/platform_localePreference, userToken
+userToken: 存在，长度 92，开头 {"value":"PCJC3lCRkfbk1p
+解析: 是 JSON，.value 长度 64
+
+【只靠 cookie（不带任何认证头）】HTTP 200
+{"code":40002,"msg":"Missing Token","data":null}
+
+【带 Authorization 令牌】HTTP 200
+{"code":0,"msg":"","data":{"biz_code":0,"biz_msg":"","biz_data":{"normal_wallets":[{"currency":"CNY","balance":"11.3737209800000000","token_estimation":"0"}],"bonus_wallets":[{"currency":"CNY","balance":"0","token_estima

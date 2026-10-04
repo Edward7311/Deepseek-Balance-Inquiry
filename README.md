@@ -1,25 +1,16 @@
 # DeepSeek 余额 — 安卓应用
 
-一个装在手机上的余额查看器。打开就看到 DeepSeek 账户还剩多少钱，点一下刷新。
+装在手机上的 DeepSeek 账户工具。不用 Gradle、不用 Android Studio。
 
-**不依赖 Gradle，不依赖 Android Studio**，用 `tools/` 里那套工具链直接编译出 APK。
+## 三块功能
 
-```
-out/dsbalance-1.0.apk     34 KB
-```
-
-## 它做什么 / 不做什么
-
-| 能做 | 不能做 |
+| 区块 | 说明 |
 |---|---|
-| 显示总余额、充值余额、赠送余额 | ❌ 显示 token 用量 |
-| 显示账户是否可用 | ❌ 显示消费金额、请求次数 |
-| 下拉刷新、缓存上次数据 | ❌ 任何图表 |
-| 深浅色主题切换 | ❌ 修改账户任何设置 |
+| **余额** | 总余额、充值余额、账户是否可用。打开秒显，**永不失效** |
+| **用量** | 近 30 天的汇总、按天消费柱状图、按模型列表。**依赖私有接口，可能失效** |
+| **官网界面** | 直接嵌入 `platform.deepseek.com`，点右上角地球图标打开 |
 
-**为什么没有用量统计**：官方公开 API 只提供 `/user/balance` 一个接口，用它只能拿到余额。
-那些图表数据在网页仪表盘的**私有接口**后面，需要一个叫 `userToken` 的浏览器登录令牌——
-**API key 对它无效**（会返回 `40003 invalid token`）。那条路脆弱且令牌比 key 更敏感，本项目刻意不走。
+三块**互相独立**：用量那块整个坏掉，余额照常显示。
 
 ## 构建
 
@@ -27,62 +18,44 @@ out/dsbalance-1.0.apk     34 KB
 python build.py
 ```
 
-依次执行：`aapt2 compile` → `aapt2 link` → `javac` → `d8` → 打包 → `zipalign` → `apksigner`。
-
-只需要 JDK（已装 JDK 25）。工具链已解压在 `tools/`，**构建过程完全离线**。
+只用 JDK。工具链在 `tools/`，构建全程离线。
 
 ## 安装
 
-```bash
-# 1. 推到手机（不能用 adb install，见下）
-MSYS_NO_PATHCONV=1 ./tools/platform-tools/adb.exe push out/dsbalance-1.0.apk /sdcard/Download/
+**不能用 `adb install`**——手机系统会拦截，报 `INSTALL_FAILED_USER_RESTRICTED`。
+推到手机再手动装：
 
-# 2. 然后在手机上：文件管理 → 下载 → 点这个文件 → 安装
+```bash
+MSYS_NO_PATHCONV=1 ./tools/platform-tools/adb.exe push out/dsbalance-1.0.apk /sdcard/Download/
 ```
 
-## 数据与安全
+然后在手机上：**文件管理 → 下载 → 点这个文件 → 安装**。
+覆盖安装即可，已填的 key 和主题设置都会保留。
 
-- **API key 存在本机** `SharedPreferences`（文件 `dsbalance`，键 `api_key`），**明文**
-- 这是刻意的取舍：加密要引入 Android Keystore，对"只装自己手机上"的场景收益不匹配
-- **key 绝不写进代码或 APK**，需要你在应用里手动填入
-- 应用只访问 `https://api.deepseek.com/user/balance`，**从不访问 `platform.deepseek.com`**，
-  也不碰浏览器登录态
+## 源码分工
 
-## 技术参数
-
-| 项 | 值 |
+| 类 | 干什么 |
 |---|---|
-| 包名 | com.example.dsbalance |
-| minSdkVersion | 26（Android 8.0） |
-| targetSdk / compileSdk | 35（Android 15） |
-| 第三方依赖 | 无（只用系统自带的 HttpURLConnection 和 org.json） |
-| 签名 | v1 + v2，调试证书（口令 `android`） |
-| 测试机型 | 小米 14（23127PN0CC），Android 16 / API 36 |
+| `MainActivity` | 宿主：主题、边到边、装配两个区块 |
+| `BalanceSection` | 余额区（官方接口，独立可靠） |
+| `UsageSection` | 用量区的界面与流程 |
+| `UsageSession` | WebView 生命周期、登录检测、发请求 |
+| `UsageBridge` | JS 桥，唯一的 JS↔Java 通道 |
+| `UsageModel` | 私有接口的解析 + 格式化 |
+| `BarChartView` | 自绘柱状图（无图表库） |
 
-## 已验证 / 未验证
+其余：`BalanceApi` / `BalanceCache` / `ApiKeyStore` / `ThemePrefs`。
 
-**已在真机上验证：**
-- 余额真实拉取成功，字段名（`is_available`、`balance_infos`、`total_balance`…）全部正确
-- 深色/浅色主题切换生效，且**独立于系统设置**（系统仍是浅色时应用可为深色）
-- 主题偏好在强制关闭并重启后保留
-- 重启后自动刷新，确实拉到新数据（余额数值随时间变化）
-- 边到边适配正确（用 `uiautomator dump` 逐个核对了控件坐标，未被状态栏/导航条遮挡）
-- 错误提示经实机测试正常
+## 两条要注意的
 
-**尚未验证：**
-- 6 条错误分支**没有逐一覆盖**（已确认可用，但超时 / 服务器错误 / 数据格式异常
-  这三种难以主动触发）
-- 缓存的"秒显"效果（网络太快，3 秒内就刷完了，看不出先显示旧数据的瞬间）
+- **`debug.keystore` 不要删。** 它是签名密钥；重新生成会得到不同的签名，
+  新版就盖不住手机上已装的版本，必须先卸载——key 和主题设置会一起丢。
+- **`tools/` 不用管。** 那是 Google 的 Android SDK（279 MB），已被 `.gitignore`
+  排除，随时可以重新下载。
 
-## 已知的坑
+## 更多
 
-- **HyperOS 会缓存桌面图标**：更新后桌面可能仍显示旧图标，锁屏解锁或重启后才会刷新
-- **`adb shell input` 被禁止**：同样的安全设置拦截，所以无法用命令行模拟点击，
-  需要人工在手机上操作
-- 手机系统若在 22:00–07:00 自动切深色，应用选「跟随系统」时会跟着变
-
-## 后续可做
-
-- 覆盖剩余的错误分支（超时、服务器错误、数据格式异常）
-- 应用内嵌浏览器登录以获取 `userToken`，从而显示用量图表（代价大、脆弱，见开头）
-- 余额低于阈值时发通知提醒
+- **[docs/notes.md](docs/notes.md)** —— 踩过的坑：构建、私有接口、内嵌浏览器
+  三组共 15 条。**卡住的时候先翻这个。**
+- **[docs/api-sample-2026-10-03.txt](docs/api-sample-2026-10-03.txt)** ——
+  私有接口的真实原始返回。接口哪天变了，对着它比对就知道哪里变了。

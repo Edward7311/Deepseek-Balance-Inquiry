@@ -4,6 +4,7 @@
 
     <!-- 主题 -->
     <string name="theme_title">主题</string>
+    <string name="browser_toggle">网页</string>
     <string name="theme_system">跟随系统</string>
     <string name="theme_light">始终浅色</string>
     <string name="theme_dark">始终深色</string>
@@ -11,13 +12,23 @@
     <!-- 余额卡片 -->
     <string name="total_balance">总余额</string>
     <string name="topped_up">充值余额</string>
-    <string name="granted">赠送余额</string>
     <string name="status_ok">可用</string>
     <string name="status_bad">不可用</string>
     <string name="amount_format">¥ %1$s</string>
     <string name="currency_cny">CNY</string>
     <string name="updated_format">最后更新 %1$s</string>
     <string name="placeholder">—</string>
+
+    <!--
+      余额区的「累计消费」卡片。数值只有仪表盘的私有接口有，所以它一旦拿不到
+      就在数值位置直接说明原因，并且可以点。
+    -->
+    <string name="balance_accumulated">累计消费</string>
+    <string name="balance_loading">···</string>
+    <string name="balance_need_login">需登录</string>
+    <string name="balance_relogin">重新登录</string>
+    <string name="balance_unavailable">暂不可用</string>
+    <string name="balance_accumulated_detail">累计消费取不到</string>
 
     <!-- 操作 -->
     <string name="refresh">刷新</string>
@@ -29,6 +40,7 @@
     <string name="input_desc">Key 只保存在这台手机上，不会发送到任何其他地方。\n在 platform.deepseek.com 的 API keys 页面可以创建。</string>
     <string name="input_hint">sk-…</string>
     <string name="save">保存</string>
+    <string name="cancel">取消</string>
     <string name="key_empty_toast">请先输入 API key</string>
 
     <!-- 错误提示 -->
@@ -39,4 +51,47 @@
     <string name="error_parse">返回数据格式异常</string>
     <string name="error_no_balance">未查询到余额信息</string>
     <string name="error_showing_cache">%1$s，显示的是上次的数据</string>
+
+    <!-- 用量区 -->
+    <string name="usage_title">用量</string>
+    <string name="usage_refresh">刷新</string>
+    <string name="usage_fetching">获取中…</string>
+    <string name="usage_note">近 30 天。数据来自网页仪表盘的私有接口，需要先在内嵌浏览器里登录。</string>
+    <string name="usage_not_logged_in">未登录</string>
+    <string name="usage_logged_in">已登录</string>
+    <string name="usage_login_hint">点右上角「网页」按钮打开官网，在那里登录</string>
+    <string name="usage_login_done">完成</string>
+    <string name="usage_logout">退出登录（清除本机会话）</string>
+    <string name="usage_logout_confirm_title">退出登录？</string>
+    <string name="usage_logout_confirm">会清除应用内保存的登录会话，下次需要重新用手机号登录。余额功能不受影响。</string>
+    <string name="usage_logout_confirm_ok">退出</string>
+
+    <string name="usage_cost">消费金额</string>
+    <string name="usage_requests">请求次数</string>
+    <string name="usage_tokens">Tokens</string>
+    <string name="usage_daily_cost">消费金额（按天）</string>
+    <string name="usage_by_model">按模型</string>
+    <string name="usage_max_format">最高 %1$s</string>
+    <string name="usage_model_detail">%1$s · %2$s 次 · %3$s tokens</string>
+
+    <!-- 诊断 -->
+    <string name="usage_diagnostics">诊断</string>
+    <string name="usage_capture">捕获页面真实请求</string>
+    <string name="usage_probe">抓取原始数据</string>
+    <string name="usage_diag">检查登录状态</string>
+    <string name="usage_diagnosing">正在检查…（约 12 秒）</string>
+    <string name="usage_probing">抓取中…</string>
+    <string name="usage_probe_done">抓取完成，共 %1$d 个接口</string>
+    <string name="usage_raw_title">原始输出</string>
+    <string name="usage_raw_close">收起</string>
+    <string name="usage_capturing">正在重载用量页并捕获接口调用…（约 10 秒）</string>
+    <string name="usage_captured">捕获到 %1$d 个接口调用：</string>
+    <string name="usage_captured_none">没有捕获到任何接口调用。可能是页面还没登录，或者数据没触发请求。</string>
+    <string name="usage_no_token">还没拿到登录凭证，请先完成登录。</string>
+
+    <!-- 用量请求的错误 -->
+    <string name="usage_error_network">网络连接失败，显示的是上次的数据</string>
+    <string name="usage_error_format">接口返回格式已变化，需要更新应用（%1$s）</string>
+    <string name="usage_error_login">登录已过期 · 点「打开登录页面」重新登录</string>
+    <string name="usage_error_unknown">用量数据获取失败</string>
 </resources>
