@@ -32,8 +32,8 @@ README 之外的参考材料。**卡住的时候先翻这里**——下面每条
 **判断构建有没有生效，要看内容而不是大小：**
 
 ```bash
-aapt2 dump resources out/dsbalance-1.0.apk | grep id/新控件id
-aapt2 dump xmltree out/dsbalance-1.0.apk --file res/layout/xxx.xml
+aapt2 dump resources out/dsbalance-2.0.apk | grep id/新控件id
+aapt2 dump xmltree out/dsbalance-2.0.apk --file res/layout/xxx.xml
 grep 方法名 build/dex/classes.dex
 ```
 

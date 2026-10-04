@@ -30,8 +30,8 @@ BUILD = os.path.join(ROOT, "build")
 OUT = os.path.join(ROOT, "out")
 
 APK_BASENAME = "dsbalance"
-VERSION_CODE = "1"
-VERSION_NAME = "1.0"
+VERSION_CODE = "2"
+VERSION_NAME = "2.0"
 MIN_SDK = "26"
 TARGET_SDK = "35"
 

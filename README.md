@@ -26,7 +26,8 @@ python build.py
 推到手机再手动装：
 
 ```bash
-MSYS_NO_PATHCONV=1 ./tools/platform-tools/adb.exe push out/dsbalance-1.0.apk /sdcard/Download/
+# 文件名里的版本号来自 build.py 的 VERSION_NAME
+MSYS_NO_PATHCONV=1 ./tools/platform-tools/adb.exe push out/dsbalance-2.0.apk /sdcard/Download/
 ```
 
 然后在手机上：**文件管理 → 下载 → 点这个文件 → 安装**。
